@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>facemagic websocket demo</title>
+    <style type="text/css">
+        .flex-container {
+            display: -webkit-box;  /* 老版本语法: Safari 3.1-6,  iOS 6-, Android browser, older WebKit browsers.  */
+            display: -moz-box;    /* 老版本语法: Firefox 19- (buggy but mostly works) */
+            display: -ms-flexbox;  /* 混合版本语法: IE 10 */
+            display: -webkit-flex;  /* 新版本语法： Chrome 21+ */
+            display: flex;       /* 新版本语法： Opera 12.1, Firefox 22+ */
+        }
+
+        .flex-direction-row {
+            -webkit-flex-direction: row; /* Safari */
+            flex-direction: row;
+        }
+
+
+        .container {
+            justify-content: center;
+            align-items: center;
+            margin-top: 100px;
+        }
+
+        .inner {
+            width: 480px;
+            height: 480px;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .item {
+            width: 150px;
+            height: 150px;
+            background-color: #ccc;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container flex-container">
+    <div class="qrcode" id='qrcode'>
+        <img src="" width="300" height="300" id='qrcodeImg' />
+    </div>
+    <div id='show' style="display: none" class="show">
+        <div class="inner flex-container flex-direction-row">
+            <div class="item" id="item1"></div>
+            <div class="item" id="item2"></div>
+            <div class="item" id="item3"></div>
+            <div class="item" id="item4"></div>
+            <div class="item" id="item5"></div>
+            <div class="item" id="item6"></div>
+            <div class="item" id="item7"></div>
+            <div class="item" id="item8"></div>
+            <div class="item" id="item9"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    var domain = '192.168.1.102:5001/';
+    var wsServer = 'ws://' + domain;
+    var websocket = new WebSocket(wsServer);
+    websocket.binaryType = "arraybuffer";
+    websocket.onopen = onOpen;
+    websocket.onclose = onClose;
+    websocket.onmessage = onMessage;
+    websocket.onerror = onError;
+
+    function onOpen () {
+        console.log('onopen')
+    }
+
+    function onClose () {
+        console.log('onClose')
+    }
+
+    function onMessage (evt) {
+        // console.log(evt.data)
+        // document.getElementById('message').innerText = evt.data
+        var msg = JSON.parse(evt.data);
+        var qrcodeImg = document.getElementById('qrcodeImg');
+        console.log(msg);
+        console.log(msg.id);
+        if (msg.type === '1') {
+            qrcodeImg.src = 'http://qr.liantu.com/api.php?text=http://' + domain + 'handler.html?id=' + msg.id
+        } else {
+            qrcodeImg.style.display = 'none';
+            document.getElementById('show').style.display = 'block';
+            if (msg.selected) {
+                var items = document.getElementsByClassName('item');
+                for (var i=0; i <items.length; i++) {
+                    items[i].style.backgroundColor = '#ccc'
+                }
+                document.getElementById(msg.selected).style.backgroundColor = 'red'
+            }
+        }
+    }
+
+    function onError () {
+        console.log('on error')
+    }
+</script>
+</body>
+</html>
